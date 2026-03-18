@@ -5,14 +5,15 @@ export default async function Home() {
   // MAIN FETCH
   // const data = await fetch('https://api.jikan.moe/v4/anime')
   // const post = await data.json()
-  
-  // TOP ANIME
-  const dataTopAnime = await fetch('https://api.jikan.moe/v4/top/anime')
-  const postTopAnime = await dataTopAnime.json()
 
-  // TOP CHARACTER
-  const dataTopChar = await fetch('https://api.jikan.moe/v4/top/characters')
-  const { data: allChar } = await dataTopChar.json()
+  const [ dataTopAnime, dataTopChara ] = await Promise.all([
+    fetch('https://api.jikan.moe/v4/top/anime?limit=7'),
+    fetch('https://api.jikan.moe/v4/top/characters')
+  ])
+  
+  const [ postTopAnime, { data: allChar }] = await Promise.all([
+    dataTopAnime.json(), dataTopChara.json()
+  ])
 
   // RANDOM TOP CHARACTER
   const randomCharIndex = Math.floor(Math.random() * allChar.length);
@@ -23,13 +24,17 @@ export default async function Home() {
       {/* SECTION 1 */}
       <section className="relative w-full h-1/2 flex">
         {/* HEADLINE */}
-        <div className="select-none p-4"> 
-           <h1 className="text-[#000000] m-8 gap-4 text-8xl font-light">
-            <span className="text-[#e14547]">Libranime</span>
+        <div className="select-none px-4"> 
+           <h1 className="text-[#000000] mx-8 my-4 gap-4 text-8xl font-light">
+            <span className="text-[#5DA8FB]">Libranime</span>
             <span className="inline-block align-middle mx-8 w-40 h-18 overflow-hidden rounded-full">
-              <img 
+              <Image 
                 src={finalChar.images.jpg.image_url} 
-                alt={finalChar.name} 
+                alt={finalChar.name}
+                width={40}
+                height={18}
+                priority
+                unoptimized={true} 
                 className="w-full h-full object-cover object-center"
               />
             </span>
@@ -43,7 +48,7 @@ export default async function Home() {
       <section className=" relative w-full h-auto flex justify-center">
         <div className="m-12">
           <h2 className="font-semibold text-2xl my-4">Trending</h2>
-          <div className="grid grid-cols-7 gap-6">
+          <div className="grid grid-cols-7 gap-6 w-full">
             {postTopAnime.data.slice(0, 7).map((anime) => (
               <div key={anime.mal_id} className="w-full">
                 
@@ -60,6 +65,13 @@ export default async function Home() {
               
               </div>
             ))}
+          </div>
+          <br />
+          <div className="flex justify-center mt-12">
+            <button className="group cursor-pointer flex items-center gap-2 px-8 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-[#e14547] transition-all duration-300">
+              Explore More 
+              <span className="group-hover:translate-x-1 transition-transform">{'>'}</span>
+            </button>
           </div>
         </div>
       </section>

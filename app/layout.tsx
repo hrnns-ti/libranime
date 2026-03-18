@@ -36,9 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${googleSans.className} antialiased`}
-      >
+      <body className={`${googleSans.className} antialiased`}>
         <Navbar />
         {children}
       </body>
