@@ -9,7 +9,6 @@ export default async function Home() {
   // TOP ANIME
   const dataTopAnime = await fetch('https://api.jikan.moe/v4/top/anime')
   const postTopAnime = await dataTopAnime.json()
-  const featuredAnime = postTopAnime.data[0]
 
   // TOP CHARACTER
   const dataTopChar = await fetch('https://api.jikan.moe/v4/top/characters')
@@ -22,8 +21,7 @@ export default async function Home() {
   return (
     <>
       {/* SECTION 1 */}
-      <section className="  relative w-full h-1/2 flex">
-
+      <section className="relative w-full h-1/2 flex">
         {/* HEADLINE */}
         <div className="select-none p-4"> 
            <h1 className="text-[#000000] m-8 gap-4 text-8xl font-light">
@@ -38,12 +36,32 @@ export default async function Home() {
             Your Open Digital Anime Library
           </h1>
         </div>
-        
-        {/* TRENDING ANIME */}
-        <div>
-
-        </div>
+      </section>
       
+
+      {/* SECTION 2 */}
+      <section className=" relative w-full h-auto flex justify-center">
+        <div className="m-12">
+          <h2 className="font-semibold text-2xl my-4">Trending</h2>
+          <div className="grid grid-cols-7 gap-6">
+            {postTopAnime.data.slice(0, 7).map((anime) => (
+              <div key={anime.mal_id} className="w-full">
+                
+                {/* PICTURE */}
+                <div className="rounded-lg overflow-hidden aspect-3/4">
+                  <img src={anime.images.jpg.image_url} alt={anime.title} className="w-full h-full object-cover" />
+                </div>
+
+                {/* TITLE */}
+                <h3 className="font-bold truncate mt-2">{anime.title}</h3>
+                
+                {/* EPISODE */}
+                <p className="text-xs text-gray-500">{anime.episodes} Episodes</p>
+              
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     </>
   );
