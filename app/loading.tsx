@@ -18,7 +18,7 @@ export default function Loading() {
 
       {/* SKELETON SECTION 2 (TRENDING) */}
       <section className="relative w-full h-auto flex justify-center">
-        <div className="m-12 w-full max-w-[1400px]"> {/* Sesuaikan lebar jika perlu */}
+        <div className="m-12 w-full max-w-400"> {/* Sesuaikan lebar jika perlu */}
           
           {/* Skeleton Title "Trending" */}
           <div className="h-8 bg-gray-200 animate-pulse w-32 rounded-md my-4 ml-2"></div>
@@ -29,7 +29,7 @@ export default function Loading() {
               <div key={index} className="w-full">
                 
                 {/* PICTURE SKELETON */}
-                <div className="rounded-lg bg-gray-200 animate-pulse aspect-[3/4]"></div>
+                <div className="rounded-lg bg-gray-200 animate-pulse aspect-3/4"></div>
 
                 {/* TITLE SKELETON */}
                 <div className="h-4 bg-gray-200 animate-pulse rounded mt-3 w-full"></div>

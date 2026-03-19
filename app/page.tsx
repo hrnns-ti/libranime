@@ -1,3 +1,4 @@
+import Navbar from "@/components/common/Navbar";
 import Image from "next/image";
 
 export default async function Home() {
@@ -21,6 +22,8 @@ export default async function Home() {
 
   return (
     <>
+      <Navbar />
+
       {/* SECTION 1 */}
       <section className="relative w-full h-1/2 flex">
         {/* HEADLINE */}
@@ -49,6 +52,7 @@ export default async function Home() {
         <div className="m-12">
           <h2 className="font-semibold text-2xl my-4">Trending</h2>
           <div className="grid grid-cols-7 gap-6 w-full">
+            {/* @ts-ignore */}
             {postTopAnime.data.slice(0, 7).map((anime) => (
               <div key={anime.mal_id} className="w-full">
                 
