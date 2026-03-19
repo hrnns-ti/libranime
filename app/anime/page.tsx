@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 export default function Page() {
     const [genres, setGenres] = useState([])
@@ -9,6 +9,9 @@ export default function Page() {
 
     const [isLoadingGenre, setIsLoadingGenre] = useState(true)
     const [isLoadingAnime, setIsLoadingAnime] = useState(false)
+
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true)
 
     useEffect(() => {
         const fetchGenres = async () => {
@@ -24,21 +27,34 @@ export default function Page() {
         fetchGenres()
     }, [])
 
-    useEffect(() => {
-        const fetchAnimeByGenre = async () => {
-            setIsLoadingAnime(true)
-            try {
-                const genreParams = selectedGenres.join(',')
-                const response = await fetch(`https://api.jikan.moe/v4/anime?genres=${genreParams}&order_by=popularity`)
-                const { data } = await response.json()
+    const fetchAnimeByGenre = useCallback(async (isNextPage = false) => {
+        setIsLoadingAnime(true)
+        try {
+            const genreParams = selectedGenres.join(',')
+            const currentPage = isNextPage ? page + 1 : 1
+
+            const response = await fetch(`https://api.jikan.moe/v4/anime?genres=${genreParams}&order_by=popularity&page=${currentPage}`)
+            const { data, pagination } = await response.json()
+            
+            if (isNextPage) {
+                // @ts-ignore
+                setAnimeList((prev) => [...prev, ...data])
+                setPage(currentPage)
+            } else {
                 setAnimeList(data)
-            } catch (error) {
-                console.error('gagal mengambil anime: ', error)
-            } finally {
-                setIsLoadingAnime(false)
+                setPage(1)
             }
+
+            setHasMore(pagination.has_next_page)
+        } catch (error) {
+            console.error('gagal mengambil anime: ', error)
+        } finally {
+            setIsLoadingAnime(false)
         }
-        fetchAnimeByGenre()
+    }, [selectedGenres, page])
+
+    useEffect(() => {
+        fetchAnimeByGenre(false)
     }, [selectedGenres])
 
     if (isLoadingGenre) return <div className="p-8 animate-pulse flex gap-2"><div className="h-8 w-20 bg-gray-200 rounded-full"></div></div>
@@ -94,6 +110,25 @@ export default function Page() {
                             <p className="text-xs text-gray-400 mt-1">{anime.type} • {anime.episodes} Eps</p>
                         </div>
                     ))
+                )}
+
+                {hasMore && (
+                    <div className="flex justify-center mt-12 mb-20">
+                        <button
+                            onClick={() => fetchAnimeByGenre(true)}
+                            disabled={isLoadingAnime}
+                            className="px-8 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-black transition-all active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {isLoadingAnime ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Loading...
+                                </>
+                            ) : (
+                                "Load More Anime"
+                            )}
+                        </button>
+                    </div>
                 )}
             </section>
         </main>
