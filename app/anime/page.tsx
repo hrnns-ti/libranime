@@ -42,7 +42,7 @@ export default function Page() {
             const currentPage = isNextPage ? page + 1 : 1
 
             const response = await fetch(
-                `https://api.jikan.moe/v4/anime?genres=${genreId}&q=${searchQuery}&type=${selectedType}&status=${selectedStatus}&order_by=popularity&page=${currentPage}`
+                `https://api.jikan.moe/v4/anime?limit=21&genres=${genreId}&q=${searchQuery}&type=${selectedType}&status=${selectedStatus}&order_by=popularity&page=${currentPage}`
             )
             const { data, pagination } = await response.json()
             
@@ -75,64 +75,43 @@ export default function Page() {
     return (
         <main className="max-w-7xl mx-auto p-8">
             <section className="mb-10 space-y-6">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-row gap-4 justify-between items items-center">
                     <p className="font-bold text-2xl text-gray-800 tracking-tighter">LIBRANIME</p>
-                    
-                    <input 
-                        type="text" 
-                        placeholder="Cari judul anime..." 
-                        value={searchQuery} 
-                        onChange={(e) => setSearchQuery(e.target.value)} 
-                        className="bg-gray-100 border border-gray-200 rounded-2xl w-full max-w-md p-4 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
-                    />
-                    
-                    <div className="flex flex-wrap gap-3 items-center pt-2">
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mr-2">Filters</p>
-
-                        <FilterDropdown
-                            label="Genre"
-                            options={genres.map((g: any) => g.name)}
-                            selectedValue={selectedGenres}
-                            onSelect={setSelectedGenres}
-                            isMulti={true}     
+                    <div className="">    
+                        <input 
+                            type="text" 
+                            placeholder="Cari judul anime..." 
+                            value={searchQuery} 
+                            onChange={(e) => setSearchQuery(e.target.value)} 
+                            className="bg-gray-100 border border-gray-200 rounded-2xl w-full max-w-md p-4 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
                         />
+                        
+                        <div className="flex flex-wrap gap-3 items-center pt-2">
+                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mr-2">Filters</p>
 
-                        <FilterDropdown 
-                            label="Type" 
-                            options={['tv', 'movie', 'ova', 'special']} 
-                            selectedValue={selectedType} 
-                            onSelect={setSelectedType} 
-                        />
+                            <FilterDropdown
+                                label="Genre"
+                                options={genres.map((g: any) => g.name)}
+                                selectedValue={selectedGenres}
+                                onSelect={setSelectedGenres}
+                                isMulti={true}     
+                            />
 
-                        <FilterDropdown 
-                            label="Status" 
-                            options={['airing', 'complete', 'upcoming']} 
-                            selectedValue={selectedStatus} 
-                            onSelect={setSelectedStatus} 
-                        />
+                            <FilterDropdown 
+                                label="Type" 
+                                options={['tv', 'movie', 'ova', 'special']} 
+                                selectedValue={selectedType} 
+                                onSelect={setSelectedType} 
+                            />
+
+                            <FilterDropdown 
+                                label="Status" 
+                                options={['airing', 'complete', 'upcoming']} 
+                                selectedValue={selectedStatus} 
+                                onSelect={setSelectedStatus} 
+                            />
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                    {genres.slice(0, 15).map((genre: any) => (
-                        <button 
-                            key={genre.mal_id} 
-                            onClick={() => {
-                                setSelectedGenres((prev: any) => 
-                                    prev.includes(genre.mal_id) 
-                                    ? prev.filter((id: number) => id !== genre.mal_id) 
-                                    : [...prev, genre.mal_id]
-                                )
-                            }} 
-                            className={`px-4 py-1.5 rounded-full text-xs transition-all border ${
-                                selectedGenres.includes(genre.mal_id as never) 
-                                ? 'bg-gray-900 text-white border-gray-900 shadow-md' 
-                                : 'bg-white text-gray-500 border-gray-100 hover:border-gray-300'
-                            }`}
-                        >
-                            {genre.name}
-                        </button>
-                    ))}
                 </div>
             </section>
 
