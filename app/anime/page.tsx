@@ -1,17 +1,22 @@
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
+import FilterDropdown from "@/components/common/FilterDropdown"
 
 export default function Page() {
     const [genres, setGenres] = useState([])
-    const [selectedGenres, setSelectedGenres] = useState([])
-    const [animeList, setAnimeList] = useState([]) // Gunakan interface
+    const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+    const [animeList, setAnimeList] = useState([])
 
     const [isLoadingGenre, setIsLoadingGenre] = useState(true)
     const [isLoadingAnime, setIsLoadingAnime] = useState(false)
 
     const [page, setPage] = useState(1)
     const [hasMore, setHasMore] = useState(true)
+
+    const [searchQuery, setSearchQuery] = useState('')    
+    const [selectedType, setSelectedType] = useState("")
+    const [selectedStatus, setSelectedStatus] = useState("")
 
     useEffect(() => {
         const fetchGenres = async () => {
@@ -30,10 +35,15 @@ export default function Page() {
     const fetchAnimeByGenre = useCallback(async (isNextPage = false) => {
         setIsLoadingAnime(true)
         try {
-            const genreParams = selectedGenres.join(',')
+            const genreId = genres
+                .filter((g: any) => selectedGenres.includes(g.name))
+                .map((g:any) => g.mal_id)
+                .join(",")
             const currentPage = isNextPage ? page + 1 : 1
 
-            const response = await fetch(`https://api.jikan.moe/v4/anime?genres=${genreParams}&order_by=popularity&page=${currentPage}`)
+            const response = await fetch(
+                `https://api.jikan.moe/v4/anime?genres=${genreId}&q=${searchQuery}&type=${selectedType}&status=${selectedStatus}&order_by=popularity&page=${currentPage}`
+            )
             const { data, pagination } = await response.json()
             
             if (isNextPage) {
@@ -51,20 +61,60 @@ export default function Page() {
         } finally {
             setIsLoadingAnime(false)
         }
-    }, [selectedGenres, page])
+    }, [selectedGenres, page, searchQuery, selectedType, selectedStatus])
 
     useEffect(() => {
-        fetchAnimeByGenre(false)
-    }, [selectedGenres])
+        const delayDebounce = setTimeout(() => {
+            fetchAnimeByGenre(false)
+        }, 500)
+        return () => clearTimeout(delayDebounce)
+    }, [selectedGenres, searchQuery, selectedType, selectedStatus])
 
     if (isLoadingGenre) return <div className="p-8 animate-pulse flex gap-2"><div className="h-8 w-20 bg-gray-200 rounded-full"></div></div>
 
     return (
-        <main className="max-w-350 mx-auto p-8">
-            <section className="mb-10">
+        <main className="max-w-7xl mx-auto p-8">
+            <section className="mb-10 space-y-6">
+                <div className="flex flex-col gap-4">
+                    <p className="font-bold text-2xl text-gray-800 tracking-tighter">LIBRANIME</p>
+                    
+                    <input 
+                        type="text" 
+                        placeholder="Cari judul anime..." 
+                        value={searchQuery} 
+                        onChange={(e) => setSearchQuery(e.target.value)} 
+                        className="bg-gray-100 border border-gray-200 rounded-2xl w-full max-w-md p-4 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                    />
+                    
+                    <div className="flex flex-wrap gap-3 items-center pt-2">
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mr-2">Filters</p>
+
+                        <FilterDropdown
+                            label="Genre"
+                            options={genres.map((g: any) => g.name)}
+                            selectedValue={selectedGenres}
+                            onSelect={setSelectedGenres}
+                            isMulti={true}     
+                        />
+
+                        <FilterDropdown 
+                            label="Type" 
+                            options={['tv', 'movie', 'ova', 'special']} 
+                            selectedValue={selectedType} 
+                            onSelect={setSelectedType} 
+                        />
+
+                        <FilterDropdown 
+                            label="Status" 
+                            options={['airing', 'complete', 'upcoming']} 
+                            selectedValue={selectedStatus} 
+                            onSelect={setSelectedStatus} 
+                        />
+                    </div>
+                </div>
+
                 <div className="flex flex-wrap gap-2">
-                    <p className="w-full font-bold mb-2 text-gray-800">FILTER</p>
-                    {genres.map((genre: any) => (
+                    {genres.slice(0, 15).map((genre: any) => (
                         <button 
                             key={genre.mal_id} 
                             onClick={() => {
@@ -74,10 +124,10 @@ export default function Page() {
                                     : [...prev, genre.mal_id]
                                 )
                             }} 
-                            className={`px-4 py-1.5 rounded-full text-sm transition-all border ${
+                            className={`px-4 py-1.5 rounded-full text-xs transition-all border ${
                                 selectedGenres.includes(genre.mal_id as never) 
                                 ? 'bg-gray-900 text-white border-gray-900 shadow-md' 
-                                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                                : 'bg-white text-gray-500 border-gray-100 hover:border-gray-300'
                             }`}
                         >
                             {genre.name}
@@ -86,51 +136,38 @@ export default function Page() {
                 </div>
             </section>
 
-            <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
-                {isLoadingAnime ? (
-                    [...Array(10)].map((_, i) => (
-                        <div key={i} className="aspect-3/4 bg-gray-100 rounded-2xl animate-pulse"></div>
-                    ))
-                ) : (
-                    animeList.map((anime) => (
-                        // @ts-ignore
-                        <div key={anime.mal_id} className="group cursor-pointer">
-                            <div className="relative aspect-3/4 overflow-hidden rounded-2xl mb-3 shadow-sm border border-gray-50 border-opacity-50">
-                                <img 
-                                    // @ts-ignore
-                                    src={anime.images.webp.image_url} 
-                                    // @ts-ignore
-                                    alt={anime.title} 
-                                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
-                                    />
-                            </div>
-                            {/* @ts-ignore */}
-                            <h3 className="font-bold text-sm line-clamp-2 leading-snug text-gray-800">{anime.title}</h3>
-                            {/* @ts-ignore */}
-                            <p className="text-xs text-gray-400 mt-1">{anime.type} • {anime.episodes} Eps</p>
+            <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-6">
+                {animeList.map((anime: any) => (
+                    <div key={anime.mal_id} className="group cursor-pointer">
+                        <div className="relative aspect-3/4 overflow-hidden rounded-2xl mb-3 shadow-sm border border-gray-100 bg-gray-50">
+                            <img 
+                                src={anime.images.webp.image_url} 
+                                alt={anime.title} 
+                                className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                            />
                         </div>
-                    ))
-                )}
-
-                {hasMore && (
-                    <div className="flex justify-center mt-12 mb-20">
-                        <button
-                            onClick={() => fetchAnimeByGenre(true)}
-                            disabled={isLoadingAnime}
-                            className="px-8 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-black transition-all active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {isLoadingAnime ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Loading...
-                                </>
-                            ) : (
-                                "Load More Anime"
-                            )}
-                        </button>
+                        <h3 className="font-bold text-sm line-clamp-2 leading-snug text-gray-800 group-hover:text-blue-600 transition-colors">{anime.title}</h3>
+                        <p className="text-[11px] text-gray-400 mt-1 uppercase tracking-wider">{anime.type} • {anime.episodes || '?'} Eps</p>
                     </div>
+                ))}
+
+                {isLoadingAnime && (
+                    [...Array(14)].map((_, i) => (
+                        <div key={`skeleton-${i}`} className="aspect-3/4 bg-gray-100 rounded-2xl animate-pulse"></div>
+                    ))
                 )}
             </section>
+
+            {hasMore && !isLoadingAnime && animeList.length > 0 && (
+                <div className="flex justify-center mt-12 mb-20">
+                    <button
+                        onClick={() => fetchAnimeByGenre(true)}
+                        className="px-10 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-black transition-all active:scale-95 shadow-lg shadow-gray-200"
+                    >
+                        Load More Anime
+                    </button>
+                </div>
+            )}
         </main>
     )
 }
