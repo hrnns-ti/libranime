@@ -1,7 +1,9 @@
 'use client'
+export const runtime = 'edge';
 
 import { useState, useEffect, useCallback } from "react"
 import FilterDropdown from "@/components/common/FilterDropdown"
+import Link from "next/link";
 
 export default function Page() {
     const [genres, setGenres] = useState([])
@@ -76,7 +78,7 @@ export default function Page() {
         <main className="max-w-7xl mx-auto p-8">
             <section className="mb-10 space-y-6">
                 <div className="flex flex-row gap-4 justify-between items items-center">
-                    <p className="font-bold text-2xl text-gray-800 tracking-tighter">LIBRANIME</p>
+                    <Link href="./" className="font-bold text-2xl text-gray-800 tracking-tighter cursor-pointer">LIBRANIME</Link>
                     <div className="">    
                         <input 
                             type="text" 

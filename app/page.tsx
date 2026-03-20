@@ -1,5 +1,6 @@
 import Navbar from "@/components/common/Navbar";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function Home() {
 
@@ -29,7 +30,7 @@ export default async function Home() {
         {/* HEADLINE */}
         <div className="select-none px-4"> 
            <h1 className="text-[#000000] mx-8 my-4 gap-4 text-8xl font-light">
-            <span className="text-[#5DA8FB]">Libranime</span>
+            <Link className=" text-[#5DA8FB]" href="home/">Libranime</Link>
             <span className="inline-block align-middle mx-8 w-40 h-18 overflow-hidden rounded-full">
               <Image 
                 src={finalChar.images.jpg.image_url} 
@@ -71,14 +72,21 @@ export default async function Home() {
             ))}
           </div>
           <br />
-          <div className="flex justify-center mt-12">
-            <button className="group cursor-pointer flex items-center gap-2 px-8 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-[#e14547] transition-all duration-300">
-              Explore More 
-              <span className="group-hover:translate-x-1 transition-transform">{'>'}</span>
-            </button>
+          <div className="pt-8 flex justify-center">
+            <Link 
+              href="/anime"
+              className="group relative inline-flex items-center gap-3 px-10 py-5 bg-black text-white rounded-2xl font-bold text-lg transition-all hover:bg-gray-800 active:scale-95 shadow-2xl shadow-gray-200"
+            >
+              Mulai Eksplorasi
+              <span className="group-hover:translate-x-1 transition-transform">{">"}</span>
+            </Link>
           </div>
         </div>
       </section>
+
+      <footer className="absolute left-12 bottom-4 text-[10px] uppercase tracking-[0.2em] text-gray-400 font-black">
+        © 2026 LIBRANIME • BUILT WITH NEXT.JS & CLOUDFLARE
+      </footer>
     </>
   );
 }
